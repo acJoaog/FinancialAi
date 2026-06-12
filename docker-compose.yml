@@ -14,6 +14,39 @@ services:
       - financeiro-network
     restart: unless-stopped
 
+  n8n:
+    build: ./backend/agent
+    container_name: finance-ai-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
+      - WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:5678/}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-America/Sao_Paulo}
+      - TZ=${GENERIC_TIMEZONE:-America/Sao_Paulo}
+      - N8N_SECURE_COOKIE=false
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_PERSONALIZATION_ENABLED=false
+      # Credenciais de login (opcional, remova se não quiser basic auth)
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-false}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - financeiro-network
+
 networks:
   financeiro-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  n8n_data:
+    name: finance-ai-n8n-data
